@@ -32,6 +32,11 @@ export const UserManager = () => {
     active: 0
   });
 
+  // Nạp tiền Modal State
+  const [depositUser, setDepositUser] = useState(null);
+  const [depositAmount, setDepositAmount] = useState('');
+  const [isDepositing, setIsDepositing] = useState(false);
+
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -67,6 +72,30 @@ export const UserManager = () => {
   const handleRestrictAccess = async (userId) => {
     if (!window.confirm('Are you sure you want to restrict this contender\'s access?')) return;
     toast.error('Access restriction logic pending backend status field');
+  };
+
+  const handleDeposit = async (e) => {
+    e.preventDefault();
+    if (!depositAmount || isNaN(Number(depositAmount)) || Number(depositAmount) <= 0) {
+      toast.error('Vui lòng nhập số tiền hợp lệ');
+      return;
+    }
+
+    setIsDepositing(true);
+    try {
+      const userToUpdate = users.find(u => u.id === depositUser.id);
+      const newBalance = Number(userToUpdate.balance) + Number(depositAmount);
+      
+      await updateUserByAdmin(depositUser.id, { balance: newBalance });
+      toast.success(`Đã nạp $${Number(depositAmount).toLocaleString()} cho ${depositUser.full_name}`);
+      setDepositUser(null);
+      setDepositAmount('');
+      fetchUsers();
+    } catch (err) {
+      toast.error(err.message || 'Nạp tiền thất bại');
+    } finally {
+      setIsDepositing(false);
+    }
   };
 
   useEffect(() => {
@@ -199,6 +228,13 @@ export const UserManager = () => {
                     <td className="px-8 py-6 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button
+                          onClick={() => setDepositUser(user)}
+                          className="p-3 text-gray-300 hover:text-green-600 hover:bg-green-50 rounded-2xl transition-all"
+                          title="Chuyển tiền / Deposit"
+                        >
+                          <DollarSign className="w-5 h-5" />
+                        </button>
+                        <button
                           onClick={() => handleUpdateRole(user.id, user.role)}
                           className="p-3 text-gray-300 hover:text-primary-600 hover:bg-primary-50 rounded-2xl transition-all"
                           title="Edit Clearance"
@@ -230,6 +266,71 @@ export const UserManager = () => {
           </table>
         </div>
       </div>
+
+      {/* Tích hợp Modal Nạp Tiền ngay trong Component */}
+      {depositUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-[32px] w-full max-w-md shadow-2xl overflow-hidden border border-gray-100">
+            <div className="p-8">
+              <div className="w-12 h-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-6">
+                <DollarSign className="w-6 h-6" />
+              </div>
+              <h2 className="text-2xl font-black text-gray-900 uppercase italic tracking-tight mb-2">Fund Allocation</h2>
+              <p className="text-gray-500 text-sm font-medium mb-8">
+                Chỉ định nạp thêm tiền vào Liquid Assets của <span className="font-bold text-gray-900">{depositUser.full_name}</span>.
+              </p>
+
+              <form onSubmit={handleDeposit} className="space-y-6">
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Amount to Deposit (USD)</label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="number"
+                      value={depositAmount}
+                      onChange={(e) => setDepositAmount(e.target.value)}
+                      placeholder="0.00"
+                      min="1"
+                      step="1"
+                      className="w-full pl-12 pr-4 py-4 bg-gray-50 border-none rounded-2xl font-bold focus:ring-2 focus:ring-green-500/20 transition-all"
+                      required
+                    />
+                  </div>
+                  <div className="flex gap-2 mt-3">
+                    {[50, 100, 500, 1000].map(val => (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => setDepositAmount(val)}
+                        className="flex-1 py-2 bg-gray-50 hover:bg-green-50 hover:text-green-600 text-gray-500 text-xs font-bold rounded-xl transition-colors"
+                      >
+                        +${val}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => { setDepositUser(null); setDepositAmount(''); }}
+                    className="flex-1 py-4 text-sm font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-colors"
+                  >
+                    CANCEL
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isDepositing}
+                    className="flex-1 py-4 text-sm font-black uppercase tracking-widest text-white bg-gray-900 hover:bg-green-600 rounded-2xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {isDepositing ? <Loader2 className="w-5 h-5 animate-spin" /> : 'DEPOSIT'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

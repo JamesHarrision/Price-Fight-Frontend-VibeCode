@@ -17,18 +17,11 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem('accessToken');
       if (token) {
         try {
-          // If we had a /me endpoint, we'd fetch the user profile here.
-          // Since the login returns user, we can either extract from JWT or require a new login if refreshed
-          // For now, assume if token exists, we are authenticated, but normally we'd decode token or fetch /me
-
-          // Basic mock user restoration: (Ideally we decode jwt to get ID, or we store user object in localstorage)
-          const storedUser = localStorage.getItem('user');
-          if (storedUser) {
-            setUser(JSON.parse(storedUser));
-          } else {
-            // Decoding or fetching would go here
-            setUser({ id: "restored" });
-          }
+          // Đảm bảo fetch dữ liệu mới nhất (Balance, Profile) từ server thay vì phụ thuộc localStorage cũ rích
+          const response = await api.get('/users/me');
+          const userData = response.data.data;
+          setUser(userData);
+          localStorage.setItem('user', JSON.stringify(userData));
         } catch (err) {
           console.error("Failed to restore session", err);
           logout();
@@ -78,11 +71,23 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const refreshUser = async () => {
+    try {
+      const response = await api.get('/users/me');
+      const userData = response.data.data;
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
+    } catch (err) {
+      console.error('Failed to refresh user', err);
+    }
+  };
+
   const value = {
     user,
     isAuthenticated: !!user,
     login,
     logout,
+    refreshUser,
     loading
   };
 

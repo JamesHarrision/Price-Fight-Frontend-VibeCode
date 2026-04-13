@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+const backendURL = "http://localhost:8080/api";
+// const backendURL = "https://price-fight-backend.onrender.com/api";
+
 const api = axios.create({
-  baseURL: 'https://price-fight-backend.onrender.com/api',
+  baseURL: backendURL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -71,7 +74,7 @@ api.interceptors.response.use(
       }
 
       try {
-        const { data } = await axios.post('https://price-fight-backend.onrender.com/api/auth/refresh-token', {
+        const { data } = await axios.post(`${backendURL}/auth/refresh-token`, {
           refreshToken: refreshToken
         });
 
