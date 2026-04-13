@@ -42,7 +42,7 @@ export const AdminLayout = () => {
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="p-6 flex items-center gap-3">
+          <Link to="/" className="p-6 flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary-600 to-purple-600 flex items-center justify-center text-white shadow-lg">
               <Trophy className="w-6 h-6" />
             </div>
@@ -52,7 +52,7 @@ export const AdminLayout = () => {
                 <span className="text-[10px] font-bold text-primary-600 uppercase tracking-widest leading-none">Admin Panel</span>
               </div>
             )}
-          </div>
+          </Link>
 
           {/* Navigation */}
           <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">

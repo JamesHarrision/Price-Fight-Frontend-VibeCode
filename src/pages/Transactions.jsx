@@ -54,7 +54,7 @@ export const Transactions = () => {
 
         {/* Header */}
         <div className="mb-10">
-          <div className="inline-flex items-center gap-3 mb-4">
+          <Link to="/" className="inline-flex items-center gap-3 mb-4 hover:opacity-80 transition-opacity">
             <div className="w-12 h-12 bg-gradient-to-tr from-primary-600 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/30">
               <Receipt className="w-6 h-6 text-white" />
             </div>
@@ -62,7 +62,7 @@ export const Transactions = () => {
               <h1 className="text-3xl font-black text-gray-900 tracking-tight">My Transactions</h1>
               <p className="text-gray-500 text-sm font-medium">Your auction payment history</p>
             </div>
-          </div>
+          </Link>
 
           {/* Filters */}
           <div className="flex items-center gap-2 mt-6 flex-wrap">

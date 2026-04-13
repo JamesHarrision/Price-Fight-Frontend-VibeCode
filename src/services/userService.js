@@ -19,3 +19,27 @@ export const updateUserByAdmin = async (userId, data) => {
   const response = await api.put(`/admin/users/${userId}`, data);
   return response.data;
 };
+
+// --- Profile & Addresses ---
+export const updateProfile = async (formData) => {
+  // formData is used instead of JSON because of file upload (avatar)
+  const response = await api.put('/users/me', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data.data;
+};
+
+export const getAddresses = async () => {
+  const response = await api.get('/users/addresses');
+  return response.data.data;
+};
+
+export const addAddress = async (data) => {
+  const response = await api.post('/users/addresses', data);
+  return response.data;
+};
+
+export const deleteAddress = async (addressId) => {
+  const response = await api.delete(`/users/addresses/${addressId}`);
+  return response.data;
+};

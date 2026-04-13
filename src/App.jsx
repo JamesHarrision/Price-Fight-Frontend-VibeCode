@@ -13,6 +13,7 @@ import { Register } from './pages/Register';
 import { VerifyEmail } from './pages/VerifyEmail';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { Transactions } from './pages/Transactions';
+import { UserProfile } from './pages/UserProfile';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { EventManager } from './pages/admin/EventManager';
@@ -41,6 +42,7 @@ function App() {
             <Route path="/events/:eventId" element={<EventDetail />} />
             <Route path="/items/:itemId" element={<ItemDetail />} />
             <Route path="/transactions" element={<Transactions />} />
+            <Route path="/profile" element={<UserProfile />} />
 
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminLayout />}>
