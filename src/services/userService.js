@@ -43,3 +43,9 @@ export const deleteAddress = async (addressId) => {
   const response = await api.delete(`/users/addresses/${addressId}`);
   return response.data;
 };
+
+// --- Live Bids ---
+export const getMyBids = async () => {
+  const response = await api.get('/users/bids');
+  return response.data.data;
+};
