@@ -29,7 +29,7 @@ export const DashboardHero = ({ searchQuery, setSearchQuery }) => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="block w-full pl-14 pr-6 py-5 border-2 border-white/10 rounded-2xl leading-5 bg-white/5 backdrop-blur-md text-white placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary-500/30 focus:border-primary-500 focus:bg-white text-lg transition-all"
+            className="block w-full pl-14 pr-6 py-5 border-2 border-white/10 rounded-2xl leading-5 bg-white/5 backdrop-blur-md text-white placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary-500/30 focus:border-primary-500 focus:bg-white focus:text-gray-900 focus:placeholder-gray-300 text-lg transition-all"
             placeholder="Search by event name, keywords, or brand..."
           />
         </div>
