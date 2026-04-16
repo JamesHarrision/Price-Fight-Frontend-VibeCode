@@ -35,7 +35,6 @@ export const Dashboard = () => {
   const filteredAndSortedEvents = useMemo(() => {
     let result = events;
 
-    // 1. Phân giải Filter Search theo tên hoặc mô tả
     if (searchQuery.trim() !== '') {
       const lower = searchQuery.toLowerCase();
       result = result.filter(e => 
@@ -44,7 +43,6 @@ export const Dashboard = () => {
       );
     }
 
-    // 2. Sắp xếp kết quả (Sort)
     let sortedResult = [...result];
     switch (sortOrder) {
       case 'newest':
@@ -73,20 +71,18 @@ export const Dashboard = () => {
 
       <main className="max-w-7xl mx-auto py-16 px-6">
         
-        {/* Catalog Control Bar */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6 border-b border-gray-200 pb-8">
           <div>
-            <h2 className="text-3xl font-black text-gray-900 tracking-tight">Active Catalog</h2>
-            <p className="text-gray-500 font-medium">Showing {filteredAndSortedEvents.length} arenas.</p>
+            <h2 className="text-3xl font-black text-gray-900 tracking-tight">Danh Sách Sự Kiện</h2>
+            <p className="text-gray-500 font-medium">Hiển thị {filteredAndSortedEvents.length} kết quả.</p>
           </div>
 
           <div className="flex items-center gap-4 flex-wrap">
-            {/* TABS LỌC (Lấy từ API) */}
             <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-gray-200 shadow-sm">
               {[
-                { id: 'ALL', label: 'All', icon: LayoutGrid },
-                { id: 'ONGOING', label: 'Live', icon: Zap },
-                { id: 'PENDING', label: 'Upcoming', icon: Clock },
+                { id: 'ALL', label: 'Tất cả', icon: LayoutGrid },
+                { id: 'ONGOING', label: 'Đang diễn ra', icon: Zap },
+                { id: 'PENDING', label: 'Sắp diễn ra', icon: Clock },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -102,16 +98,15 @@ export const Dashboard = () => {
 
             <div className="w-px h-6 bg-gray-200 mx-1 hidden sm:block"></div>
 
-            {/* BỘ SẮP XẾP SÚNG BẮN CLIENT-SIDE */}
             <div className="relative">
               <select
                 value={sortOrder}
                 onChange={(e) => setSortOrder(e.target.value)}
                 className="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2.5 pr-10 text-sm font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500/20 cursor-pointer shadow-sm"
               >
-                <option value="newest">Sort: Newest Event</option>
-                <option value="closing_soon">Sort: Closing Soon</option>
-                <option value="alpha">Sort: A-Z</option>
+                <option value="newest">Sắp xếp: Mới nhất</option>
+                <option value="closing_soon">Sắp xếp: Sắp đóng cửa</option>
+                <option value="alpha">Sắp xếp: A-Z</option>
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
                 <ArrowDownAZ className="w-4 h-4" />
@@ -127,7 +122,6 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        {/* Content Render */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1, 2, 3, 4, 5, 6].map(i => (
@@ -145,15 +139,15 @@ export const Dashboard = () => {
             <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
               <Search className="w-10 h-10 text-gray-300" />
             </div>
-            <h2 className="text-2xl font-black text-gray-900 mb-2 tracking-tight">No arenas matched your search</h2>
+            <h2 className="text-2xl font-black text-gray-900 mb-2 tracking-tight">Không tìm thấy sự kiện nào</h2>
             <p className="text-gray-500 font-medium max-w-md mx-auto">
-              Try adjusting your search filters, checking for typos, or removing the search keyword entirely to explore more items.
+              Hãy thử điều chỉnh bộ lọc hoặc xóa từ khóa tìm kiếm để xem các sự kiện khác.
             </p>
             <button 
               onClick={() => { setSearchQuery(''); setActiveTab('ALL'); }}
               className="mt-8 px-6 py-3 bg-gray-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:scale-105 transition-transform"
             >
-              Clear all filters
+              Xóa bộ lọc
             </button>
           </div>
         )}

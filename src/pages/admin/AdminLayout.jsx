@@ -22,11 +22,11 @@ export const AdminLayout = () => {
   const navigate = useNavigate();
 
   const navItems = [
-    { name: 'Terminal', path: '/admin', icon: LayoutDashboard },
-    { name: 'Arenas', path: '/admin/events', icon: Calendar },
-    { name: 'Contenders', path: '/admin/users', icon: Users },
-    { name: 'Assets', path: '/admin/items', icon: Package },
-    { name: 'Transactions', path: '/admin/transactions', icon: Receipt },
+    { name: 'Tổng Quan', path: '/admin', icon: LayoutDashboard },
+    { name: 'Phiên Đấu Giá', path: '/admin/events', icon: Calendar },
+    { name: 'Người Dùng', path: '/admin/users', icon: Users },
+    { name: 'Vật Phẩm', path: '/admin/items', icon: Package },
+    { name: 'Giao Dịch', path: '/admin/transactions', icon: Receipt },
   ];
 
   if (user?.role !== 'ADMIN') {
@@ -49,7 +49,7 @@ export const AdminLayout = () => {
             {isSidebarOpen && (
               <div>
                 <span className="font-black text-xl tracking-tighter text-gray-900 leading-none block">PriceFight</span>
-                <span className="text-[10px] font-bold text-primary-600 uppercase tracking-widest leading-none">Admin Panel</span>
+                <span className="text-[10px] font-bold text-primary-600 uppercase tracking-widest leading-none">Trang Quản Trị</span>
               </div>
             )}
           </Link>
@@ -84,7 +84,7 @@ export const AdminLayout = () => {
               {isSidebarOpen && (
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-black text-gray-900 truncate">{user?.full_name}</p>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase">Super Admin</p>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase">Quản Trị Viên</p>
                 </div>
               )}
               {isSidebarOpen && (
@@ -112,16 +112,16 @@ export const AdminLayout = () => {
               {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
             <h2 className="text-lg font-black text-gray-900">
-              {navItems.find(i => i.path === location.pathname)?.name || 'Overview'}
+              {navItems.find(i => i.path === location.pathname)?.name || 'Tổng quan'}
             </h2>
           </div>
 
           <div className="flex items-center gap-4">
             <div className="hidden md:flex flex-col items-end mr-2">
-              <span className="text-[10px] font-bold text-gray-400 uppercase leading-none mb-1">Status</span>
+              <span className="text-[10px] font-bold text-gray-400 uppercase leading-none mb-1">Tình trạng</span>
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                <span className="text-xs font-black text-gray-900 uppercase italic">System Live</span>
+                <span className="text-xs font-black text-gray-900 uppercase italic">Hoạt động tốt</span>
               </div>
             </div>
           </div>

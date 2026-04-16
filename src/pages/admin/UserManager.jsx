@@ -113,8 +113,8 @@ export const UserManager = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight uppercase italic">User Directorate</h1>
-          <p className="text-gray-500 font-medium">Monitor and manage the contender database.</p>
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight uppercase italic">Quản Lý Người Dùng</h1>
+          <p className="text-gray-500 font-medium">Theo dõi và quản lý dữ liệu người tham gia.</p>
         </div>
         <div className="flex items-center gap-4">
           <div className="bg-white px-6 py-3 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3">
@@ -122,7 +122,7 @@ export const UserManager = () => {
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase leading-none mb-1">Total Population</p>
+              <p className="text-[10px] font-black text-gray-400 uppercase leading-none mb-1">Tổng Số Lượng</p>
               <p className="text-xl font-black text-gray-900">{stats.total}</p>
             </div>
           </div>
@@ -136,7 +136,7 @@ export const UserManager = () => {
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-gray-900 transition-colors" />
             <input
               type="text"
-              placeholder="SEARCH BY IDENTITY OR ALIAS..."
+              placeholder="TÌM KIẾM THEO TÊN HOẶC EMAIL..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               className="w-full pl-14 pr-4 py-4 bg-gray-50 border-none rounded-[20px] text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-gray-950/5 transition-all"
@@ -151,7 +151,7 @@ export const UserManager = () => {
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <span className="text-[10px] font-black text-gray-400 px-4 uppercase tracking-widest">Page {page} of {totalPages}</span>
+            <span className="text-[10px] font-black text-gray-400 px-4 uppercase tracking-widest">Trang {page} / {totalPages}</span>
             <button
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
@@ -166,11 +166,11 @@ export const UserManager = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50/50">
-                <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Contender Profile</th>
-                <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Clearance</th>
-                <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Liquid Assets</th>
-                <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Timeline</th>
-                <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Actions</th>
+                <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Người Dùng</th>
+                <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Phân Quyền</th>
+                <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Số Dư (VND)</th>
+                <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Tham Gia</th>
+                <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Thao Tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -222,7 +222,7 @@ export const UserManager = () => {
                           <Calendar className="w-3.5 h-3.5 text-gray-400" />
                           {new Date(user.createdAt).toLocaleDateString()}
                         </div>
-                        <p className="text-[10px] font-black text-gray-300 uppercase italic tracking-tighter">Registered</p>
+                        <p className="text-[10px] font-black text-gray-300 uppercase italic tracking-tighter">Ngày Đăng Ký</p>
                       </div>
                     </td>
                     <td className="px-8 py-6 text-right">
@@ -258,7 +258,7 @@ export const UserManager = () => {
                     <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-dashed border-gray-200">
                       <UserX className="w-10 h-10 text-gray-200" />
                     </div>
-                    <p className="font-black text-gray-400 uppercase tracking-widest text-[10px]">No contenders match the current filter.</p>
+                    <p className="font-black text-gray-400 uppercase tracking-widest text-[10px]">Không có người dùng nào khớp với tìm kiếm.</p>
                   </td>
                 </tr>
               )}
@@ -275,14 +275,14 @@ export const UserManager = () => {
               <div className="w-12 h-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-6">
                 <DollarSign className="w-6 h-6" />
               </div>
-              <h2 className="text-2xl font-black text-gray-900 uppercase italic tracking-tight mb-2">Fund Allocation</h2>
+              <h2 className="text-2xl font-black text-gray-900 uppercase italic tracking-tight mb-2">Nạp Tiền Giao Dịch</h2>
               <p className="text-gray-500 text-sm font-medium mb-8">
                 Chỉ định nạp thêm tiền vào Liquid Assets của <span className="font-bold text-gray-900">{depositUser.full_name}</span>.
               </p>
 
               <form onSubmit={handleDeposit} className="space-y-6">
                 <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Amount to Deposit (USD)</label>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Số tiền cần nạp (đ)</label>
                   <div className="relative">
                     <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
@@ -316,14 +316,14 @@ export const UserManager = () => {
                     onClick={() => { setDepositUser(null); setDepositAmount(''); }}
                     className="flex-1 py-4 text-sm font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-colors"
                   >
-                    CANCEL
+                    HỦY BỎ
                   </button>
                   <button
                     type="submit"
                     disabled={isDepositing}
                     className="flex-1 py-4 text-sm font-black uppercase tracking-widest text-white bg-gray-900 hover:bg-green-600 rounded-2xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                   >
-                    {isDepositing ? <Loader2 className="w-5 h-5 animate-spin" /> : 'DEPOSIT'}
+                    {isDepositing ? <Loader2 className="w-5 h-5 animate-spin" /> : 'NẠP TIỀN'}
                   </button>
                 </div>
               </form>

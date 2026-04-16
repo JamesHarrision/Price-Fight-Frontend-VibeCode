@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getItemDetail, placeBid } from '../services/itemService';
 import { useAuth } from '../contexts/AuthContext';
-import { ArrowLeft, Gavel, History, Info, DollarSign, Timer, ImageOff, TrendingUp, Users, Crown, Shield, Zap, Trophy, ChevronUp } from 'lucide-react';
+import { ArrowLeft, History, Trophy, Clock, ImageOff, ShieldCheck, Zap } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { ref, onValue } from 'firebase/database';
 import { rtdb } from '../config/firebase';
@@ -16,52 +16,42 @@ export const ItemDetail = () => {
   const [loading, setLoading] = useState(true);
   const [bidAmount, setBidAmount] = useState('');
   const [placing, setPlacing] = useState(false);
-  const [activeTab, setActiveTab] = useState('history');
   const [priceFlash, setPriceFlash] = useState(false);
   const [bidCount, setBidCount] = useState(0);
   const prevPriceRef = useRef(null);
 
-  const fetchItemInfo = async () => {
-    try {
-      const data = await getItemDetail(itemId);
-      setItem(data);
-      const nextBid = parseFloat(data.current_price || data.start_price) + parseFloat(data.step_price);
-      setBidAmount(nextBid.toString());
-    } catch (err) {
-      console.error("Failed to fetch item", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchItemInfo = async () => {
+      try {
+        const data = await getItemDetail(itemId);
+        setItem(data);
+        const nextBid = parseFloat(data.current_price || data.start_price) + parseFloat(data.step_price);
+        setBidAmount(nextBid.toString());
+      } catch (err) {
+        console.error("Failed to fetch item", err);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchItemInfo();
   }, [itemId]);
 
-  // Firebase Realtime Listener
   useEffect(() => {
     if (!item?.event_id) return;
-
     const itemRef = ref(rtdb, `events/${item.event_id}/items/${itemId}`);
-
     const unsubscribe = onValue(itemRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        // Hiệu ứng flash khi giá thay đổi
         if (prevPriceRef.current !== null && data.current_price !== prevPriceRef.current) {
           setPriceFlash(true);
           setTimeout(() => setPriceFlash(false), 1200);
         }
         prevPriceRef.current = data.current_price;
-
         setItem(prev => {
           const bidsArray = data.bids
-            ? Object.values(data.bids)
-              .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+            ? Object.values(data.bids).sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
             : [];
-
           setBidCount(bidsArray.length);
-
           return {
             ...prev,
             current_price: data.current_price,
@@ -69,29 +59,24 @@ export const ItemDetail = () => {
             bids: bidsArray
           };
         });
-
         const currentPrice = parseFloat(data.current_price || item.start_price);
         const nextBid = currentPrice + parseFloat(item.step_price);
         setBidAmount(nextBid.toString());
       }
     });
-
     return () => unsubscribe();
   }, [item?.event_id, itemId]);
 
   const handleBid = async (e) => {
     e.preventDefault();
     if (!bidAmount || isNaN(bidAmount)) return;
-
     setPlacing(true);
     const bidPromise = placeBid(item.event_id, itemId, parseFloat(bidAmount));
-
     toast.promise(bidPromise, {
-      loading: 'Submitting your bid...',
-      success: '🎉 Bid placed! You are now in the lead!',
-      error: (err) => err.message || 'Failed to place bid.'
+      loading: 'Đang gửi giá...',
+      success: '🎉 Trả giá thành công! Bạn đang dẫn đầu!',
+      error: (err) => err.message || 'Lỗi khi đặt giá.'
     });
-
     try {
       await bidPromise;
     } catch (err) {
@@ -102,11 +87,8 @@ export const ItemDetail = () => {
   };
 
   if (loading) return (
-    <div className="flex justify-center items-center h-screen bg-gradient-to-br from-gray-900 to-indigo-950">
-      <div className="flex flex-col items-center gap-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-400"></div>
-        <p className="text-white/50 font-bold text-sm uppercase tracking-widest">Loading auction...</p>
-      </div>
+    <div className="flex justify-center items-center h-screen bg-gray-50">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
     </div>
   );
 
@@ -114,280 +96,174 @@ export const ItemDetail = () => {
   const minBid = currentPrice + parseFloat(item?.step_price);
   const totalBids = bidCount;
   const isLeading = item?.highest_bidder_id === user?.id;
-  const priceIncrease = currentPrice - parseFloat(item?.start_price);
+  const isLive = item?.status === 'LIVE';
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-indigo-950">
-      {/* Top Navbar */}
-      <nav className="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center justify-between">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-white/60 hover:text-white transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span className="text-sm font-bold hidden sm:inline">Back</span>
-        </button>
-        <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${item?.status === 'LIVE' ? 'bg-green-400 animate-pulse' : 'bg-gray-500'}`}></div>
-          <span className="text-white/80 text-sm font-black uppercase tracking-widest">{item?.status === 'LIVE' ? 'Live Auction' : item?.status}</span>
-        </div>
-        <Link to="/" className="text-white/40 hover:text-white text-sm font-bold transition-colors">
-          <Trophy className="w-5 h-5" />
-        </Link>
-      </nav>
+  // --- DARK THEME (LIVE) ---
+  if (isLive) {
+    return (
+      <div className="min-h-screen bg-[var(--color-navy-900)] text-white font-sans selection:bg-primary-500/30">
+        <nav className="border-b border-white/10 px-6 py-4 flex items-center justify-between bg-[var(--color-navy-950)]">
+          <div className="flex items-center gap-4">
+            <button onClick={() => navigate(-1)} className="text-white/60 hover:text-white transition-colors">
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <span className="font-bold text-lg tracking-wide uppercase">Phòng Đấu Giá</span>
+              <span className="text-xs text-white/40 ml-4 hidden md:inline">ID: #AUK{item?.id?.substring(0, 8).toUpperCase()}</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-green-400">
+            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+            <span className="text-xs font-bold uppercase tracking-widest hidden md:inline">Trực tiếp</span>
+          </div>
+        </nav>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <main className="max-w-5xl mx-auto px-6 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12">
+            
+            {/* Top section: Image left, Summary Right */}
+            <div className="md:col-span-6 flex justify-center items-center bg-[var(--color-navy-950)] rounded-3xl p-8 border border-white/5 relative group perspective-1000">
+              <div className="absolute top-4 left-4 bg-red-500 text-white text-xs font-black uppercase px-2 py-1 rounded shadow-lg flex items-center gap-1 z-10 w-fit">
+                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span> LIVE
+              </div>
+              {item?.primary_image ? (
+                <img src={item.primary_image} alt={item?.name} className="max-w-full h-auto max-h-[350px] object-contain drop-shadow-2xl transition-transform duration-700 group-hover:scale-105" />
+              ) : (
+                <ImageOff className="w-32 h-32 text-white/10" />
+              )}
+              <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-[var(--color-navy-950)] to-transparent opacity-50 rounded-b-3xl"></div>
+            </div>
 
-          {/* =================== LEFT COLUMN: Image + Tabs =================== */}
-          <div className="lg:col-span-7 space-y-6">
-
-            {/* Image Gallery */}
-            <div className="bg-white/5 backdrop-blur-md p-3 rounded-[28px] border border-white/10 shadow-2xl">
-              <div className="aspect-[4/3] rounded-[20px] overflow-hidden bg-gray-800 relative">
-                {item?.primary_image ? (
-                  <img
-                    src={item.primary_image}
-                    className="w-full h-full object-cover"
-                    alt={item?.name}
-                    onError={(e) => { e.target.style.display = 'none'; if(e.target.nextSibling) e.target.nextSibling.style.display = 'flex'; }}
-                  />
-                ) : null}
-                <div className={`w-full h-full flex-col items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 ${item?.primary_image ? 'hidden' : 'flex'} absolute inset-0`}>
-                  <ImageOff className="w-16 h-16 text-gray-600 mb-4" />
-                  <p className="text-lg font-black text-gray-500">No Image Available</p>
-                  <p className="text-sm text-gray-600 font-medium mt-1">The seller has not uploaded a photo yet.</p>
+            <div className="md:col-span-6 flex flex-col justify-center">
+              <h1 className="text-2xl md:text-3xl font-bold mb-8 leading-tight">{item?.name}</h1>
+              <div className="space-y-6">
+                <div>
+                  <p className="text-white/40 text-sm font-medium mb-1">Giá hiện tại</p>
+                  <p className={`text-4xl lg:text-5xl font-black text-primary-400 transition-all duration-300 ${priceFlash ? 'scale-105 text-white' : ''}`}>
+                    {currentPrice.toLocaleString()} đ
+                  </p>
                 </div>
-                {/* Overlay gradient */}
-                <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-gray-900/80 to-transparent"></div>
-                <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
-                  <h1 className="text-2xl font-black text-white drop-shadow-lg leading-tight">{item?.name}</h1>
+                <div className="flex items-center gap-12 border-t border-white/10 pt-6">
+                  <div>
+                    <p className="text-white/40 text-xs mb-1">Bước giá</p>
+                    <p className="text-lg font-bold">{parseFloat(item?.step_price).toLocaleString()} đ</p>
+                  </div>
+                  <div>
+                    <p className="text-white/40 text-xs mb-1">Thời gian còn lại</p>
+                    <div className="flex items-center gap-2 font-black text-lg">
+                      <div className="text-center"><span className="text-xl">00</span></div>:<div className="text-center"><span className="text-xl">15</span></div>:<div className="text-center"><span className="text-xl text-primary-400">36</span></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Tabs: Details / Bid History */}
-            <div className="bg-white/5 backdrop-blur-md rounded-[28px] border border-white/10 overflow-hidden">
-              <div className="flex border-b border-white/5">
-                <button
-                  onClick={() => setActiveTab('info')}
-                  className={`flex-1 py-4 text-sm font-bold flex items-center justify-center gap-2 transition-all ${activeTab === 'info' ? 'text-primary-400 border-b-2 border-primary-400 bg-white/5' : 'text-white/40 hover:text-white/60'}`}
-                >
-                  <Info className="w-4 h-4" />
-                  Details
-                </button>
-                <button
-                  onClick={() => setActiveTab('history')}
-                  className={`flex-1 py-4 text-sm font-bold flex items-center justify-center gap-2 transition-all ${activeTab === 'history' ? 'text-primary-400 border-b-2 border-primary-400 bg-white/5' : 'text-white/40 hover:text-white/60'}`}
-                >
-                  <History className="w-4 h-4" />
-                  Bid History
-                  {totalBids > 0 && (
-                    <span className="bg-primary-500/20 text-primary-400 text-[10px] font-black px-2 py-0.5 rounded-full">{totalBids}</span>
-                  )}
-                </button>
-              </div>
-
-              <div className="p-6 min-h-[350px]">
-                {activeTab === 'info' ? (
-                  <div>
-                    <div className="flex gap-3 mb-6 flex-wrap">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 text-green-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-green-500/20">
-                        <Shield className="w-3 h-3" /> Verified
-                      </span>
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 text-amber-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-500/20">
-                        <Zap className="w-3 h-3" /> Live
-                      </span>
+            {/* Bottom Section: History Left, Bid Right */}
+            <div className="md:col-span-7">
+              <h3 className="text-lg font-bold mb-4 flex items-center gap-2 border-b border-white/10 pb-4">
+                <History className="w-5 h-5 text-white/50" /> Lịch sử trả giá
+              </h3>
+              <div className="space-y-1">
+                {item?.bids?.length > 0 ? item.bids.slice(0, 6).map((bid, i) => (
+                  <div key={i} className={`flex justify-between items-center py-3 px-2 rounded-lg ${i === 0 ? 'bg-primary-500/10 border border-primary-500/20' : ''}`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${i === 0 ? 'bg-primary-500 text-white' : 'bg-white/10 text-white/60'}`}>
+                        {(bid.full_name || 'U').substring(0, 1).toUpperCase()}
+                      </div>
+                      <span className="text-sm text-white/80">{bid.full_name || `Người dùng ${bid.user_id.substring(0,4)}`}</span>
                     </div>
-                    <p className="text-white/60 font-medium leading-relaxed text-[15px]">
-                      {item?.description || 'No detailed description provided for this item.'}
-                    </p>
+                    <div className="flex items-center gap-4 text-sm">
+                      <span className={`font-bold ${i === 0 ? 'text-primary-400' : ''}`}>{parseFloat(bid.amount).toLocaleString()} đ</span>
+                      <span className="text-white/30 text-xs w-12 text-right">{new Date(bid.time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
                   </div>
-                ) : (
-                  <div>
-                    {item?.bids?.length > 0 ? (
-                      <div className="max-h-[380px] overflow-y-auto space-y-2.5 pr-1 custom-scrollbar">
-                        {item.bids.slice(0, 5).map((bid, i) => (
-                          <div
-                            key={i}
-                            className={`flex items-center justify-between p-4 rounded-2xl border transition-all duration-500
-                              ${i === 0
-                                ? `bg-gradient-to-r from-primary-500/20 to-purple-500/20 border-primary-500/30 shadow-lg shadow-primary-500/10 ${priceFlash ? 'ring-2 ring-primary-400 animate-pulse' : ''}`
-                                : 'bg-white/5 border-white/5 hover:bg-white/10'
-                              }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0
-                                ${i === 0 ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30' : 'bg-white/10 text-white/60'}`}
-                              >
-                                {i === 0 ? <Crown className="w-5 h-5" /> : <span>{(bid.full_name || 'U').substring(0, 1).toUpperCase()}</span>}
-                              </div>
-                              <div className="min-w-0">
-                                <p className={`text-sm font-bold truncate ${i === 0 ? 'text-white' : 'text-white/70'}`}>
-                                  {bid.full_name || `Bidder #${(bid.user_id || '').substring(0, 5)}`}
-                                </p>
-                                <p className="text-[10px] text-white/30 font-bold">
-                                  {new Date(bid.time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="text-right shrink-0">
-                              <p className={`text-lg font-black tracking-tight ${i === 0 ? 'text-primary-400' : 'text-white/80'}`}>
-                                ${parseFloat(bid.amount).toLocaleString()}
-                              </p>
-                              {i === 0 && (
-                                <span className="text-[9px] bg-primary-500 text-white px-2 py-0.5 rounded-full font-black uppercase tracking-widest">
-                                  Leading
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                        {item.bids.length > 5 && (
-                          <div className="text-center py-3">
-                            <span className="text-xs text-white/30 font-bold bg-white/5 px-4 py-1.5 rounded-full">
-                              + {item.bids.length - 5} earlier bid(s)
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="text-center py-16">
-                        <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
-                          <Gavel className="w-10 h-10 text-white/20" />
-                        </div>
-                        <p className="font-black text-white/40 text-sm">No bids yet!</p>
-                        <p className="text-xs text-white/20 font-medium mt-1">Be the first to place a bid on this item.</p>
-                      </div>
-                    )}
-                  </div>
+                )) : (
+                  <p className="text-center py-6 text-white/30 text-sm">Chưa có lượt trả giá nào</p>
                 )}
               </div>
             </div>
-          </div>
 
-          {/* =================== RIGHT COLUMN: Bidding Panel =================== */}
-          <div className="lg:col-span-5">
-            <div className="sticky top-24 space-y-6">
-
-              {/* Main Price Card */}
-              <div className="relative overflow-hidden rounded-[32px] shadow-2xl shadow-primary-900/30">
-                {/* Animated bg */}
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-950"></div>
-                <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500 rounded-full blur-[100px] opacity-20"></div>
-                <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500 rounded-full blur-[80px] opacity-15"></div>
-
-                <div className="relative z-10 p-8">
-                  {/* Header */}
-                  <div className="flex justify-between items-center mb-8">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-2.5 h-2.5 rounded-full ${item?.status === 'LIVE' ? 'bg-green-400 animate-pulse' : 'bg-gray-500'}`}></div>
-                      <span className="text-white/80 text-xs font-black uppercase tracking-widest">{item?.status}</span>
-                    </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-full border border-white/10">
-                      <Users className="w-3.5 h-3.5 text-indigo-300" />
-                      <span className="text-xs font-black text-indigo-200">{totalBids} bids</span>
-                    </div>
-                  </div>
-
-                  {/* Price Display - Hero */}
-                  <div className="mb-2">
-                    <p className="text-indigo-300/80 font-black uppercase tracking-widest text-[10px] mb-3">Current Highest Bid</p>
-                    <div className={`transition-all duration-700 ${priceFlash ? 'scale-110 origin-left' : 'scale-100'}`}>
-                      <span className={`text-[56px] font-black tracking-tighter leading-none transition-colors duration-500 ${priceFlash ? 'text-yellow-300' : 'text-white'}`}>
-                        ${currentPrice.toLocaleString()}
-                      </span>
-                    </div>
-                    {priceFlash && (
-                      <div className="flex items-center gap-1.5 mt-3 animate-bounce">
-                        <ChevronUp className="w-4 h-4 text-yellow-400" />
-                        <span className="text-yellow-300 text-[10px] font-black uppercase tracking-widest">New bid received!</span>
-                      </div>
-                    )}
-                    {!priceFlash && priceIncrease > 0 && (
-                      <div className="flex items-center gap-1.5 mt-3">
-                        <TrendingUp className="w-3.5 h-3.5 text-green-400" />
-                        <span className="text-green-400/70 text-[10px] font-bold">+${priceIncrease.toLocaleString()} from start</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Stats Grid */}
-                  <div className="grid grid-cols-2 gap-3 my-8">
-                    <div className="bg-white/5 rounded-2xl p-4 border border-white/10 text-center">
-                      <p className="text-indigo-400/80 text-[9px] font-black uppercase tracking-widest mb-1">Start Price</p>
-                      <p className="text-lg font-black text-white">${parseFloat(item?.start_price).toLocaleString()}</p>
-                    </div>
-                    <div className="bg-white/5 rounded-2xl p-4 border border-white/10 text-center">
-                      <p className="text-indigo-400/80 text-[9px] font-black uppercase tracking-widest mb-1">Min Step</p>
-                      <p className="text-lg font-black text-white">+${parseFloat(item?.step_price).toLocaleString()}</p>
-                    </div>
-                  </div>
-
-                  {/* Leading Status Banner */}
-                  {totalBids > 0 && (
-                    <div className={`mb-6 p-4 rounded-2xl border text-center transition-all duration-500 ${isLeading
-                        ? 'bg-green-500/15 border-green-400/20'
-                        : 'bg-red-500/15 border-red-400/20'
-                      }`}>
-                      <p className={`text-sm font-black uppercase tracking-widest ${isLeading ? 'text-green-300' : 'text-red-300'}`}>
-                        {isLeading ? '🏆 You are leading!' : '⚡ You have been outbid!'}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Bid Form */}
-                  <form onSubmit={handleBid} className="space-y-4">
-                    <div className="relative group">
-                      <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-white/40 group-focus-within:text-white transition-colors">
-                        <DollarSign className="w-5 h-5" />
-                      </div>
-                      <input
-                        type="number"
-                        value={bidAmount}
-                        min={minBid}
-                        onChange={(e) => setBidAmount(e.target.value)}
-                        className="w-full bg-white/10 border-2 border-white/10 rounded-2xl py-5 pl-14 pr-4 text-white text-xl font-black placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-primary-400/50 focus:border-primary-400/50 focus:bg-white/15 transition-all"
-                        placeholder={`Min bid $${minBid}`}
-                      />
-                      <p className="mt-2 text-[10px] text-indigo-300/60 font-bold ml-1">Minimum: ${minBid.toLocaleString()}</p>
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={placing || item?.status !== 'LIVE'}
-                      className="w-full bg-gradient-to-r from-primary-500 to-purple-500 text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-primary-500/30 hover:shadow-primary-500/50 transform active:scale-[0.97] transition-all disabled:opacity-40 disabled:cursor-not-allowed group relative overflow-hidden"
-                    >
-                      <span className="relative z-10 flex items-center justify-center gap-2">
-                        {placing ? 'PLACING BID...' : 'PLACE BID NOW'}
-                        {!placing && <Gavel className="w-5 h-5 group-hover:rotate-12 transition-transform" />}
-                      </span>
-                      <div className="absolute inset-0 bg-gradient-to-r from-primary-400 to-purple-400 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    </button>
-                  </form>
+            <div className="md:col-span-5 bg-[var(--color-navy-950)] border border-white/10 rounded-3xl p-6 h-fit mt-8 md:mt-0 shadow-xl">
+              <h3 className="text-white/80 font-bold mb-4">Đặt giá của bạn</h3>
+              <form onSubmit={handleBid}>
+                <div className="relative mb-3">
+                  <input
+                    type="number"
+                    value={bidAmount}
+                    min={minBid}
+                    onChange={(e) => setBidAmount(e.target.value)}
+                    className="w-full bg-[var(--color-navy-900)] border border-white/10 rounded-xl py-4 px-4 text-white text-xl font-bold focus:outline-none focus:border-primary-500 transition-colors"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 font-bold">đ</span>
                 </div>
-              </div>
-
-              {/* Wallet Card */}
-              <div className="bg-white/5 backdrop-blur-md p-6 rounded-[28px] border border-white/10">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 border border-amber-500/20">
-                    <DollarSign className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Your Wallet</p>
-                    <p className="text-xl font-black text-white leading-none">${parseFloat(user?.balance || 0).toLocaleString()}</p>
-                  </div>
+                <div className="flex justify-between text-xs text-white/40 mb-6 px-1">
+                  <span>Bước giá: {parseFloat(item?.step_price).toLocaleString()} đ</span>
+                  {isLeading && <span className="text-primary-400 font-bold">Bạn đang dẫn đầu</span>}
                 </div>
-                <button className="w-full py-3 border-2 border-dashed border-white/10 rounded-xl text-white/30 font-bold hover:border-primary-500/50 hover:text-primary-400 transition-all text-sm">
-                  + Deposit funds
+                <button
+                  type="submit"
+                  disabled={placing}
+                  className="w-full bg-primary-400 hover:bg-primary-500 text-gray-900 font-black py-4 rounded-xl transition-all shadow-[0_4px_20px_rgba(212,175,55,0.3)] disabled:opacity-50"
+                >
+                  {placing ? 'ĐANG ĐẶT...' : 'ĐẶT GIÁ'}
                 </button>
-              </div>
+              </form>
             </div>
+            
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // --- LIGHT THEME (PENDING/ENDED) ---
+  return (
+    <div className="min-h-screen bg-gray-50 flex justify-center py-12 px-4 sm:px-6">
+      <div className="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+        
+        <div className="bg-gradient-to-b from-gray-100 to-white relative pt-8 pb-4 flex justify-center">
+          <button onClick={() => navigate(-1)} className="absolute top-6 left-6 text-gray-400 hover:text-black">
+             <ArrowLeft className="w-6 h-6" />
+          </button>
+          {item?.primary_image ? (
+            <img src={item.primary_image} alt={item?.name} className="w-64 h-64 object-contain drop-shadow-xl" />
+          ) : (
+            <div className="w-64 h-64 bg-gray-100 rounded-full flex items-center justify-center"><ImageOff className="w-12 h-12 text-gray-300" /></div>
+          )}
+        </div>
+
+        <div className="p-8">
+          <h1 className="text-xl font-bold text-gray-900 mb-4">{item?.name}</h1>
+          
+          <div className="flex items-center gap-2 mb-6">
+             <span className="px-2 py-0.5 bg-red-100 text-red-600 border border-red-200 text-[10px] font-black uppercase rounded">LIVE</span>
+             <span className="text-sm font-bold text-gray-600">Sắp diễn ra</span>
           </div>
 
+          <div className="flex justify-between items-center py-4 border-t border-gray-100">
+            <span className="text-gray-500 text-sm">Thời gian bắt đầu</span>
+            <span className="font-bold whitespace-pre text-right text-sm">
+              {new Date(item?.start_time).toLocaleDateString('vi-VN')}
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center py-4 border-t border-gray-100">
+            <span className="text-gray-500 text-sm">Giá khởi điểm</span>
+            <span className="font-black text-xl text-gray-900">{parseFloat(item?.start_price).toLocaleString()} đ</span>
+          </div>
+
+          <div className="flex justify-between items-center py-4 border-t border-gray-100 mb-4">
+            <span className="text-gray-500 text-sm">Số người quan tâm</span>
+            <span className="font-bold text-sm">28</span>
+          </div>
+
+          <button 
+            disabled className="w-full bg-primary-300 text-gray-900/50 py-4 rounded-xl font-black transition-colors"
+          >
+            Chưa bắt đầu
+          </button>
         </div>
-      </main>
+      </div>
     </div>
   );
 };

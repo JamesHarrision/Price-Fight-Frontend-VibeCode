@@ -41,7 +41,7 @@ export const AdminDashboard = () => {
         const data = await getAdminStats();
         setStats(data);
       } catch (err) {
-        toast.error('Failed to load system stats');
+        toast.error('Không tải được thống kê hệ thống');
       } finally {
         setLoading(false);
       }
@@ -52,7 +52,7 @@ export const AdminDashboard = () => {
   if (loading) return (
     <div className="flex flex-col items-center justify-center min-h-[400px] text-gray-400">
       <Loader2 className="w-10 h-10 animate-spin mb-4" />
-      <p className="font-black uppercase tracking-widest text-[10px]">Analyzing Ecosystem Health...</p>
+      <p className="font-black uppercase tracking-widest text-[10px]">Đang kiểm tra hệ thống...</p>
     </div>
   );
 
@@ -61,8 +61,8 @@ export const AdminDashboard = () => {
       {/* Welcome Banner */}
       <div className="relative overflow-hidden bg-gray-900 rounded-[40px] p-10 text-white shadow-2xl shadow-gray-950/20 group">
         <div className="relative z-10">
-          <h1 className="text-4xl font-black tracking-tight mb-2">Systems Online.</h1>
-          <p className="text-gray-400 font-bold max-w-md">The PriceFight ecosystem is running at optimal performance. Manage your arenas and participants below.</p>
+          <h1 className="text-4xl font-black tracking-tight mb-2">Hệ thống hoạt động.</h1>
+          <p className="text-gray-400 font-bold max-w-md">Nền tảng PriceFight đang vận hành tối ưu. Quản lý các phiên đấu giá và người dùng bên dưới.</p>
         </div>
         {/* Abstract Background Decoration */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary-600/20 blur-[100px] -mr-32 -mt-32 rounded-full animate-pulse group-hover:bg-purple-600/30 transition-colors duration-1000"></div>
@@ -72,28 +72,28 @@ export const AdminDashboard = () => {
       {/* Grid Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         <StatCard
-          label="Total Revenue"
+          label="Tổng Doanh Thu"
           value={`$${Number(stats?.totalRevenue || 0).toLocaleString()}`}
           trend={12}
           icon={TrendingUp}
           color="primary"
         />
         <StatCard
-          label="Active Users"
+          label="Người Dùng Mới"
           value={stats?.activeUsers || 0}
           trend={5}
           icon={Users}
           color="blue"
         />
         <StatCard
-          label="Total Bids"
+          label="Lượt Trả Giá"
           value={stats?.ongoingBids || 0}
           trend={-2}
           icon={Zap}
           color="orange"
         />
         <StatCard
-          label="Live Items"
+          label="Sản Phẩm Live"
           value={stats?.liveItems || 0}
           trend={8}
           icon={Package}
@@ -103,13 +103,13 @@ export const AdminDashboard = () => {
 
       {/* Service Health - full width */}
       <div className="bg-white rounded-[40px] border border-gray-100 p-8 shadow-sm">
-        <h3 className="text-xl font-black text-gray-900 tracking-tight mb-8">Service Health</h3>
+        <h3 className="text-xl font-black text-gray-900 tracking-tight mb-8">Tình Trạng Dịch Vụ</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: 'Cloudinary API', status: 'Operational', icon: Globe, color: 'green' },
-            { label: 'Firebase RTDB', status: 'Optimal', icon: Zap, color: 'blue' },
-            { label: 'Database Node', status: 'Secure', icon: ShieldCheck, color: 'primary' },
-            { label: 'Mail Server', status: 'Operational', icon: Globe, color: 'green' },
+            { label: 'Cloudinary API', status: 'Hoạt động', icon: Globe, color: 'green' },
+            { label: 'Firebase RTDB', status: 'Tối ưu', icon: Zap, color: 'blue' },
+            { label: 'Database Node', status: 'An toàn', icon: ShieldCheck, color: 'primary' },
+            { label: 'Mail Server', status: 'Hoạt động', icon: Globe, color: 'green' },
           ].map((svc, i) => (
             <div key={i} className="flex items-center justify-between p-5 rounded-3xl bg-gray-50 border border-transparent hover:border-gray-100 transition-all">
               <div className="flex items-center gap-3">

@@ -1,16 +1,21 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary-50: #f5f3ff;
-  --color-primary-100: #ede9fe;
-  --color-primary-200: #ddd6fe;
-  --color-primary-300: #c4b5fd;
-  --color-primary-400: #a78bfa;
-  --color-primary-500: #8b5cf6;
-  --color-primary-600: #7c3aed;
-  --color-primary-700: #6d28d9;
-  --color-primary-800: #5b21b6;
-  --color-primary-900: #4c1d95;
+  --color-primary-50: #fbf9f1;
+  --color-primary-100: #f6f0db;
+  --color-primary-200: #eaddb3;
+  --color-primary-300: #deca84;
+  --color-primary-400: #d4af37; /* Core Gold */
+  --color-primary-500: #c29528; /* Stronger Gold */
+  --color-primary-600: #a77721;
+  --color-primary-700: #85581e;
+  --color-primary-800: #71481e;
+  --color-primary-900: #603c1c;
+
+  /* Custom Navy colors for Bidding Room */
+  --color-navy-950: #0a0f18;
+  --color-navy-900: #121824;
+  --color-navy-800: #1a2333;
 }
 
 @layer base {

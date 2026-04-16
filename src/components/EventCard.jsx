@@ -15,8 +15,17 @@ export const EventCard = ({ event }) => {
     }
   };
 
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'ONGOING': return 'Đang diễn ra';
+      case 'PENDING': return 'Sắp diễn ra';
+      case 'ENDED': return 'Đã kết thúc';
+      default: return status;
+    }
+  };
+
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('vi-VN', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -33,7 +42,7 @@ export const EventCard = ({ event }) => {
         />
         <div className="absolute top-4 left-4">
           <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(status)}`}>
-            {status}
+            {getStatusText(status)}
           </span>
         </div>
       </div>
@@ -43,17 +52,17 @@ export const EventCard = ({ event }) => {
           {title}
         </h3>
         <p className="text-gray-500 text-sm line-clamp-2 mb-4 h-10">
-          {description || 'No description available for this auction event.'}
+          {description || 'Không có mô tả chi tiết cho phiên đấu giá này.'}
         </p>
 
         <div className="flex flex-col gap-2 mb-6">
           <div className="flex items-center text-sm text-gray-600 gap-2">
             <Calendar className="w-4 h-4 text-primary-500" />
-            <span>Starts: {formatDate(start_time)}</span>
+            <span>Bắt đầu: {formatDate(start_time)}</span>
           </div>
           <div className="flex items-center text-sm text-gray-600 gap-2">
             <Clock className="w-4 h-4 text-primary-500" />
-            <span>Ends: {formatDate(end_time)}</span>
+            <span>Kết thúc: {formatDate(end_time)}</span>
           </div>
         </div>
 
@@ -61,7 +70,7 @@ export const EventCard = ({ event }) => {
           onClick={() => navigate(`/events/${id}`)}
           className="w-full py-3 bg-gray-50 text-gray-900 font-bold rounded-xl flex items-center justify-center gap-2 group-hover:bg-primary-600 group-hover:text-white transition-all duration-300"
         >
-          View Auction Items
+          Xem Sản Phẩm
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </button>
       </div>
