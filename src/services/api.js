@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-const backendURL = "http://localhost:8080/api";
-// const backendURL = "https://price-fight-backend.onrender.com/api";
+const backendURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
 
 const api = axios.create({
   baseURL: backendURL,

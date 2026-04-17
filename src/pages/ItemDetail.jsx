@@ -137,21 +137,21 @@ export const ItemDetail = () => {
             <div className="md:col-span-6 flex flex-col justify-center">
               <h1 className="text-2xl md:text-3xl font-bold mb-8 leading-tight">{item?.name}</h1>
               <div className="space-y-6">
-                <div>
-                  <p className="text-white/40 text-sm font-medium mb-1">Giá hiện tại</p>
-                  <p className={`text-4xl lg:text-5xl font-black text-primary-400 transition-all duration-300 ${priceFlash ? 'scale-105 text-white' : ''}`}>
+                <div className="bg-white/5 border border-white/10 rounded-[32px] p-8 shadow-2xl relative overflow-hidden backdrop-blur-md">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/20 blur-[60px] rounded-full"></div>
+                  <p className="text-white/40 text-xs font-black uppercase tracking-widest mb-2 flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-primary-400" /> Giá hiện tại
+                  </p>
+                  <p className={`text-5xl lg:text-6xl font-black text-primary-400 drop-shadow-[0_0_25px_rgba(212,175,55,0.3)] transition-all duration-300 ${priceFlash ? 'scale-110 translate-x-4 text-white drop-shadow-[0_0_40px_rgba(255,255,255,0.5)]' : ''}`}>
                     {currentPrice.toLocaleString()} đ
                   </p>
-                </div>
-                <div className="flex items-center gap-12 border-t border-white/10 pt-6">
-                  <div>
-                    <p className="text-white/40 text-xs mb-1">Bước giá</p>
-                    <p className="text-lg font-bold">{parseFloat(item?.step_price).toLocaleString()} đ</p>
-                  </div>
-                  <div>
-                    <p className="text-white/40 text-xs mb-1">Thời gian còn lại</p>
-                    <div className="flex items-center gap-2 font-black text-lg">
-                      <div className="text-center"><span className="text-xl">00</span></div>:<div className="text-center"><span className="text-xl">15</span></div>:<div className="text-center"><span className="text-xl text-primary-400">36</span></div>
+                  
+                  <div className="mt-8 pt-6 border-t border-white/10 flex items-center justify-between">
+                    <div>
+                      <p className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-1.5">Bước giá tối thiểu</p>
+                      <span className="text-xl font-black text-white bg-white/10 px-4 py-2 rounded-xl border border-white/5 inline-flex items-center gap-1 shadow-inner">
+                        <span className="text-primary-400">+</span> {parseFloat(item?.step_price).toLocaleString()} <span className="text-sm opacity-50 ml-1">đ</span>
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -217,12 +217,16 @@ export const ItemDetail = () => {
   }
 
   // --- LIGHT THEME (PENDING/ENDED) ---
+  const isPending = item?.status === 'PENDING';
+  const displayPrice = isPending ? parseFloat(item?.start_price) : parseFloat(item?.current_price || item?.start_price);
+  const timeString = item?.event?.start_time || item?.start_time;
+
   return (
     <div className="min-h-screen bg-gray-50 flex justify-center py-12 px-4 sm:px-6">
       <div className="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
         
         <div className="bg-gradient-to-b from-gray-100 to-white relative pt-8 pb-4 flex justify-center">
-          <button onClick={() => navigate(-1)} className="absolute top-6 left-6 text-gray-400 hover:text-black">
+          <button onClick={() => navigate(-1)} className="absolute top-6 left-6 text-gray-400 hover:text-black hover:scale-110 transition-transform">
              <ArrowLeft className="w-6 h-6" />
           </button>
           {item?.primary_image ? (
@@ -236,31 +240,30 @@ export const ItemDetail = () => {
           <h1 className="text-xl font-bold text-gray-900 mb-4">{item?.name}</h1>
           
           <div className="flex items-center gap-2 mb-6">
-             <span className="px-2 py-0.5 bg-red-100 text-red-600 border border-red-200 text-[10px] font-black uppercase rounded">LIVE</span>
-             <span className="text-sm font-bold text-gray-600">Sắp diễn ra</span>
+             <span className={`px-2 py-0.5 border text-[10px] font-black uppercase rounded ${isPending ? 'bg-amber-100 text-amber-600 border-amber-200' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
+               {isPending ? 'SẮP TỚI' : 'KẾT THÚC'}
+             </span>
+             <span className="text-sm font-bold text-gray-600">
+               {isPending ? 'Phiên đấu giá sắp diễn ra' : 'Phiên đấu giá đã khép lại'}
+             </span>
           </div>
 
           <div className="flex justify-between items-center py-4 border-t border-gray-100">
-            <span className="text-gray-500 text-sm">Thời gian bắt đầu</span>
+            <span className="text-gray-500 text-sm">{isPending ? 'Thời gian bắt đầu' : 'Thời gian kết thúc'}</span>
             <span className="font-bold whitespace-pre text-right text-sm">
-              {new Date(item?.start_time).toLocaleDateString('vi-VN')}
+              {timeString && !isNaN(new Date(timeString).getTime()) ? new Date(timeString).toLocaleDateString('vi-VN') : 'Đang cập nhật'}
             </span>
           </div>
 
-          <div className="flex justify-between items-center py-4 border-t border-gray-100">
-            <span className="text-gray-500 text-sm">Giá khởi điểm</span>
-            <span className="font-black text-xl text-gray-900">{parseFloat(item?.start_price).toLocaleString()} đ</span>
-          </div>
-
           <div className="flex justify-between items-center py-4 border-t border-gray-100 mb-4">
-            <span className="text-gray-500 text-sm">Số người quan tâm</span>
-            <span className="font-bold text-sm">28</span>
+            <span className="text-gray-500 text-sm">{isPending ? 'Giá khởi điểm' : 'Giá chốt cuối cùng'}</span>
+            <span className="font-black text-xl text-primary-600">{displayPrice.toLocaleString()} đ</span>
           </div>
 
           <button 
-            disabled className="w-full bg-primary-300 text-gray-900/50 py-4 rounded-xl font-black transition-colors"
+            disabled className={`w-full py-4 rounded-xl font-black transition-colors ${isPending ? 'bg-amber-300/50 text-amber-900/50' : 'bg-gray-200 text-gray-400'}`}
           >
-            Chưa bắt đầu
+            {isPending ? 'Chưa bắt đầu' : 'Đã kết thúc'}
           </button>
         </div>
       </div>
