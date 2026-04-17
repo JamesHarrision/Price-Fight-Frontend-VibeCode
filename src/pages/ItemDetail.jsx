@@ -217,7 +217,7 @@ export const ItemDetail = () => {
   }
 
   // --- LIGHT THEME (PENDING/ENDED) ---
-  const isPending = item?.status === 'PENDING';
+  const isPending = item?.status === 'WAITING' || item?.event?.status === 'PENDING';
   const displayPrice = isPending ? parseFloat(item?.start_price) : parseFloat(item?.current_price || item?.start_price);
   const timeString = item?.event?.start_time || item?.start_time;
 
